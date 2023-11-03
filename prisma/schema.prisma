@@ -1,0 +1,481 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model gnmstakunbank {
+  no_bank      Int          @id @default(autoincrement())
+  nama_bank    String       @db.VarChar(20)
+  no_rekening  String       @db.VarChar(25)
+  alias        String       @db.VarChar(10)
+  kd_branch    Int
+  tb_mstbranch tb_mstbranch @relation(fields: [kd_branch], references: [kd_branch], onDelete: NoAction, onUpdate: NoAction, map: "gnmstakunbank_ibfk_1")
+
+  @@index([kd_branch], map: "kd_branch")
+}
+
+model tb_inventarisperbaikan {
+  kode_barang            String                                @id @db.VarChar(11)
+  status_kondisi         tb_inventarisperbaikan_status_kondisi
+  tanggal_mulai          DateTime                              @db.Date
+  dimulai_oleh           String                                @db.VarChar(30)
+  tanggal_selesai        DateTime?                             @db.Date
+  keterangan_perbaikan   String?                               @db.VarChar(200)
+  diselesaikan_oleh      String?                               @db.VarChar(30)
+  tb_mstbaranginventaris tb_mstbaranginventaris                @relation(fields: [kode_barang], references: [kode_barang], onDelete: NoAction, onUpdate: NoAction, map: "tb_inventarisperbaikan_ibfk_1")
+}
+
+model tb_karyawancuti {
+  no_cuti             String         @id @db.VarChar(25)
+  no_ktp              String         @db.VarChar(17)
+  jabatan_cuti        String         @db.VarChar(70)
+  hak_cutitahun       Int
+  hak_cuti            Int
+  lama_cuti           Int
+  tertanggal_cuti     String         @db.VarChar(50)
+  sisa_cutitahun      Int
+  sisa_cuti           Int
+  alasan_cuti         String         @db.VarChar(50)
+  alamat_cuti         String         @db.VarChar(75)
+  nama_pengganti      String         @db.VarChar(40)
+  jabatan_pengganti   String         @db.VarChar(70)
+  dikeluarkan         String         @db.VarChar(40)
+  jabatan_dikeluarkan String         @db.VarChar(70)
+  tanggal_cuti        DateTime       @db.Date
+  tb_mstkaryawan      tb_mstkaryawan @relation(fields: [no_ktp], references: [no_ktp], onDelete: NoAction, onUpdate: NoAction, map: "tb_karyawancuti_ibfk_1")
+
+  @@index([no_ktp], map: "no_ktp")
+}
+
+model tb_karyawansp {
+  no_sp               String         @id @db.VarChar(25)
+  no_ktp              String         @db.VarChar(17)
+  nama_divisi         String         @db.VarChar(70)
+  jabatan             String         @db.VarChar(70)
+  pelanggaran         String         @db.Text
+  jenis_sp            String         @db.VarChar(75)
+  dikeluarkan         String         @db.VarChar(40)
+  jabatan_dikeluarkan String         @db.VarChar(70)
+  diketahui           String         @db.VarChar(40)
+  jabatan_diketahui   String         @db.VarChar(70)
+  disetujui           String         @db.VarChar(40)
+  jabatan_disetujui   String         @db.VarChar(70)
+  tanggalsp           DateTime       @db.Date
+  tb_mstkaryawan      tb_mstkaryawan @relation(fields: [no_ktp], references: [no_ktp], onDelete: NoAction, onUpdate: NoAction, map: "tb_karyawansp_ibfk_1")
+
+  @@index([no_ktp], map: "no_ktp")
+}
+
+model tb_mstaccount {
+  kode_account      String              @id @db.Char(3)
+  nama_account      String              @db.VarChar(20)
+  keterangan        String              @db.VarChar(50)
+  tb_mstkonsumen    tb_mstkonsumen[]
+}
+
+model tb_mstakunbank {
+  kd_bank   Int    @id @default(autoincrement())
+  nama_bank String @db.VarChar(10)
+}
+
+model tb_mstbaranginventaris {
+  kode_barang            String                                @id @db.VarChar(11)
+  id_kategori            Int
+  periode_beli           DateTime                              @db.Date
+  keterangan             String                                @db.Text
+  status_kondisi         tb_mstbaranginventaris_status_kondisi
+  tb_inventarisperbaikan tb_inventarisperbaikan?
+  tb_mstbarangkategori   tb_mstbarangkategori                  @relation(fields: [id_kategori], references: [id_kategori], onDelete: NoAction, onUpdate: NoAction, map: "tb_mstbaranginventaris_ibfk_1")
+  tb_mstpenanggungjawab  tb_mstpenanggungjawab[]               
+
+  @@index([id_kategori], map: "id_kategori")
+}
+
+model tb_mstbarangkategori {
+  id_kategori            Int                      @id @default(autoincrement())
+  jenis_kategori         String                   @db.VarChar(30)
+  tb_mstbaranginventaris tb_mstbaranginventaris[]
+}
+
+model tb_mstbranch {
+  kd_branch         Int                 @id @default(autoincrement())
+  nama_branch       String              @db.VarChar(70)
+  npwp              String              @db.VarChar(25)
+  gnmstakunbank     gnmstakunbank[]
+  tb_mstoutlet      tb_mstoutlet[]
+  tb_periode        tb_periode[]
+  tb_posisi         tb_posisi[]
+  tb_posisihistory  tb_posisihistory[]
+  tb_mstkonsumen    tb_mstkonsumen[]
+  tb_mstsupplier    tb_mstsupplier[]
+}
+
+model tb_mstdivisi {
+  kd_divisi        Int                @id @default(autoincrement())
+  nama_divisi      String             @db.VarChar(70)
+  tb_posisi        tb_posisi[]
+  tb_posisihistory tb_posisihistory[]
+}
+
+model tb_mstjabatan {
+  kd_jabatan       Int                @id @default(autoincrement())
+  nama_jabatan     String             @db.VarChar(70)
+  tb_posisi        tb_posisi[]
+  tb_posisihistory tb_posisihistory[]
+}
+
+model tb_mstkaryawan {
+  no_ktp                  String                       @id @db.VarChar(17)
+  nama_karyawan           String                       @db.VarChar(40)
+  tempat_lahir            String                       @db.VarChar(30)
+  tanggal_lahir           DateTime                     @db.Date
+  jenis_kelamin           tb_mstkaryawan_jenis_kelamin
+  alamat                  String                       @db.VarChar(255)
+  agama                   tb_mstkaryawan_agama
+  status_kawin            tb_mstkaryawan_status_kawin
+  no_telp                 String                       @db.VarChar(17)
+  pendidikan              tb_mstkaryawan_pendidikan
+  nama_ibu                String                       @db.VarChar(35)
+  nama_pasangan           String                       @db.VarChar(35)
+  jumlah_anak             String                       @db.Char(2)
+  no_npwp                 String                       @db.VarChar(17)
+  tanggal_masuk           DateTime                     @db.Date
+  status                  tb_mstkaryawan_status
+  keterangan              String
+  tb_karyawancuti         tb_karyawancuti[]
+  tb_karyawansp           tb_karyawansp[]
+  tb_mstkaryawanfoto      tb_mstkaryawanfoto?
+  tb_mstkaryawangaji      tb_mstkaryawangaji?
+  tb_mstpenanggungjawab   tb_mstpenanggungjawab[]      
+  tb_payroll_detail       tb_payroll_detail[]
+  tb_posisi               tb_posisi?
+  tb_posisihistorykontrak tb_posisihistorykontrak[]
+}
+
+model tb_mstkaryawanfoto {
+  no_ktp         String         @id @db.VarChar(17)
+  foto           Bytes          @db.Blob
+  tb_mstkaryawan tb_mstkaryawan @relation(fields: [no_ktp], references: [no_ktp], onDelete: NoAction, onUpdate: NoAction, map: "tb_mstkaryawanfoto_ibfk_1")
+}
+
+model tb_mstkaryawangaji {
+  no_ktp         String         @id @db.VarChar(17)
+  nama_bank      String         @db.VarChar(10)
+  no_rekening    String         @db.VarChar(13)
+  gaji           BigInt
+  tb_mstkaryawan tb_mstkaryawan @relation(fields: [no_ktp], references: [no_ktp], onDelete: NoAction, onUpdate: NoAction, map: "tb_mstkaryawangaji_ibfk_1")
+}
+
+model tb_mstkaryawanqrcode {
+  no_ktp String @id @db.VarChar(17)
+  qrcode Bytes  @db.Blob
+}
+
+model tb_mstkonsumen {
+  kd_konsumen                                                      String                @id @db.Char(10)
+  nama_konsumen                                                    String                @db.VarChar(50)
+  kode_account                                                     String                @db.Char(3)
+  kd_branch                                                        Int
+  status                                                           tb_mstkonsumen_status
+  
+  tb_mstbranch                                                     tb_mstbranch @relation(fields: [kd_branch], references: [kd_branch], onDelete: NoAction, onUpdate: NoAction, map: "tb_mstbranch_tbmstkonsumen")
+  tb_mstaccount                                                    tb_mstaccount @relation(fields: [kode_account], references: [kode_account], onDelete: NoAction, onUpdate: NoAction, map: "tb_mstaccount_tbmstkonsumen")
+  @@index([kd_branch], map: "kd_branch")
+  @@index([kode_account], map: "kode_account")
+}
+
+model tb_mstoutlet {
+  kd_branch        Int
+  kd_outlet        Int                @id @default(autoincrement())
+  nama_outlet      String             @db.VarChar(50)
+  alamat_outlet    String             @db.VarChar(200)
+  no_telp          String             @db.VarChar(20)
+  suboutlet        String             @db.VarChar(15)
+  tb_mstbranch     tb_mstbranch       @relation(fields: [kd_branch], references: [kd_branch], onDelete: NoAction, onUpdate: NoAction, map: "tb_mstoutlet_ibfk_1")
+  tb_posisi        tb_posisi[]
+  tb_posisihistory tb_posisihistory[]
+
+  @@index([kd_branch], map: "kd_branch")
+}
+
+model tb_mstpenanggungjawab {
+  id_penanggungjawab     Int                    @id @default(autoincrement())
+  kode_barang            String                 @db.VarChar(11)
+  no_ktp                 String                 @db.VarChar(17)
+  tb_mstbaranginventaris tb_mstbaranginventaris @relation(fields: [kode_barang], references: [kode_barang], onDelete: NoAction, onUpdate: NoAction, map: "tb_mstpenanggungjawab_ibfk_1")
+  tb_mstkaryawan         tb_mstkaryawan         @relation(fields: [no_ktp], references: [no_ktp], onDelete: NoAction, onUpdate: NoAction, map: "tb_mstpenanggungjawab_ibfk_2")
+
+  @@index([kode_barang], map: "kode_barang")
+  @@index([no_ktp], map: "no_ktp")
+}
+
+model tb_mstsupplier {
+  kd_supplier                                                      String                @id @db.Char(10)
+  nama_supplier                                                    String                @db.VarChar(50)
+  kode_account                                                     String                @db.Char(3)
+  kd_branch                                                        Int
+  status                                                           tb_mstsupplier_status
+  tb_mstbranch                                                     tb_mstbranch @relation(fields: [kd_branch], references: [kd_branch], onDelete: NoAction, onUpdate: NoAction, map: "tb_mstbranch_tomstsupplier")
+  @@index([kd_branch], map: "kd_branch")
+  @@index([kode_account], map: "kode_account")
+}
+
+model tb_msttypeaccount {
+  no_typeaccount   Int    @id @default(autoincrement())
+  kode_typeaccount String @db.Char(3)
+  keterangan       String @db.VarChar(10)
+}
+
+model tb_mstuser {
+  id_user       Int                    @id @default(autoincrement())
+  nama_user     String                 @db.VarChar(30)
+  password_user String                 @db.VarChar(100)
+  role_user     tb_mstuser_role_user
+  kd_branch     Int
+  kd_divisi     Int
+  status_user   tb_mstuser_status_user
+}
+
+model tb_payroll_detail {
+  periode_payroll String         @db.VarChar(6)
+  no_ktp          String         @db.VarChar(17)
+  nama_bank       String         @db.VarChar(10)
+  no_rekening     String         @db.VarChar(13)
+  gaji            BigInt
+  tb_mstkaryawan  tb_mstkaryawan @relation(fields: [no_ktp], references: [no_ktp], onDelete: NoAction, onUpdate: NoAction, map: "tb_payroll_detail_ibfk_2")
+
+  @@id([periode_payroll, no_ktp])
+  @@index([no_ktp], map: "no_ktp")
+}
+
+model tb_payroll_header {
+  periode_payroll String   @db.VarChar(6)
+  nama_branch     String   @db.VarChar(70)
+  tanggal_buat    DateTime @db.Date
+
+  @@id([periode_payroll, nama_branch])
+}
+
+model tb_periode {
+  no_periode   Int               @id @default(autoincrement())
+  tahun        String            @db.Char(4)
+  bulan        String            @db.Char(2)
+  periode      String            @db.Char(6)
+  kd_branch    Int
+  kode_dokumen String            @db.Char(3)
+  keterangan   String            @db.VarChar(15)
+  no_urut      Int
+  status       tb_periode_status
+  tb_mstbranch tb_mstbranch      @relation(fields: [kd_branch], references: [kd_branch], onDelete: NoAction, onUpdate: NoAction, map: "tb_periode_ibfk_1")
+
+  @@index([kd_branch], map: "kd_branch")
+}
+
+model tb_posisi {
+  no_ktp                  String                    @id @db.VarChar(17)
+  kd_branch               Int
+  kd_outlet               Int
+  suboutlet               String                    @db.VarChar(15)
+  kd_divisi               Int
+  kd_jabatan              Int
+  tb_mstkaryawan          tb_mstkaryawan            @relation(fields: [no_ktp], references: [no_ktp], onDelete: NoAction, onUpdate: NoAction, map: "tb_posisi_ibfk_1")
+  tb_mstbranch            tb_mstbranch              @relation(fields: [kd_branch], references: [kd_branch], onDelete: NoAction, onUpdate: NoAction, map: "tb_posisi_ibfk_2")
+  tb_mstoutlet            tb_mstoutlet              @relation(fields: [kd_outlet], references: [kd_outlet], onDelete: NoAction, onUpdate: NoAction, map: "tb_posisi_ibfk_3")
+  tb_mstdivisi            tb_mstdivisi              @relation(fields: [kd_divisi], references: [kd_divisi], onDelete: NoAction, onUpdate: NoAction, map: "tb_posisi_ibfk_4")
+  tb_mstjabatan           tb_mstjabatan             @relation(fields: [kd_jabatan], references: [kd_jabatan], onDelete: NoAction, onUpdate: NoAction, map: "tb_posisi_ibfk_5")
+  tb_posisihistory        tb_posisihistory[]
+  tb_posisihistorykontrak tb_posisihistorykontrak[]
+
+  @@index([kd_branch], map: "kd_branch")
+  @@index([kd_divisi], map: "kd_divisi")
+  @@index([kd_jabatan], map: "kd_jabatan")
+  @@index([kd_outlet], map: "kd_outlet")
+}
+
+model tb_posisihistory {
+  id_posisihistory Int           @id @default(autoincrement())
+  no_ktp           String        @db.VarChar(17)
+  kd_branch        Int
+  kd_outlet        Int
+  suboutlet        String        @db.VarChar(15)
+  kd_divisi        Int
+  kd_jabatan       Int
+  no_sk            String        @db.VarChar(20)
+  tanggal_sk       DateTime      @db.Date
+  tb_posisi        tb_posisi     @relation(fields: [no_ktp], references: [no_ktp], onDelete: NoAction, onUpdate: NoAction, map: "tb_posisihistory_ibfk_1")
+  tb_mstbranch     tb_mstbranch  @relation(fields: [kd_branch], references: [kd_branch], onDelete: NoAction, onUpdate: NoAction, map: "tb_posisihistory_ibfk_2")
+  tb_mstoutlet     tb_mstoutlet  @relation(fields: [kd_outlet], references: [kd_outlet], onDelete: NoAction, onUpdate: NoAction, map: "tb_posisihistory_ibfk_3")
+  tb_mstdivisi     tb_mstdivisi  @relation(fields: [kd_divisi], references: [kd_divisi], onDelete: NoAction, onUpdate: NoAction, map: "tb_posisihistory_ibfk_4")
+  tb_mstjabatan    tb_mstjabatan @relation(fields: [kd_jabatan], references: [kd_jabatan], onDelete: NoAction, onUpdate: NoAction, map: "tb_posisihistory_ibfk_5")
+
+  @@index([kd_branch], map: "kd_branch")
+  @@index([kd_divisi], map: "kd_divisi")
+  @@index([kd_jabatan], map: "kd_jabatan")
+  @@index([kd_outlet], map: "kd_outlet")
+  @@index([no_ktp], map: "no_ktp")
+}
+
+model tb_posisihistoryall {
+  id_posisihistoryall     Int                            @id @default(autoincrement())
+  no_ktp                  String                         @db.VarChar(17)
+  kd_branch               Int
+  kd_outlet               Int
+  suboutlet               String                         @db.VarChar(15)
+  kd_divisi               Int
+  kd_jabatan              Int
+  keterangan              tb_posisihistoryall_keterangan
+  dari_tanggal            DateTime                       @db.Date
+  sampai_tanggal          DateTime                       @db.Date
+  notes                   String                         @db.VarChar(30)
+  no_sk                   String                         @db.VarChar(20)
+  tanggal_sk              DateTime                       @db.Date
+  id_posisihistorykontrak Int
+  id_posisihistory        Int
+}
+
+model tb_posisihistorykontrak {
+  id_posisihistorykontrak Int                                @id @default(autoincrement())
+  no_ktp                  String                             @db.VarChar(17)
+  kd_branch               Int
+  kd_outlet               Int
+  suboutlet               String                             @db.VarChar(15)
+  kd_divisi               Int
+  kd_jabatan              Int
+  keterangan              tb_posisihistorykontrak_keterangan
+  dari_tanggal            DateTime                           @db.Date
+  sampai_tanggal          DateTime                           @db.Date
+  notes                   String                             @db.VarChar(30)
+  tb_mstkaryawan          tb_mstkaryawan                     @relation(fields: [no_ktp], references: [no_ktp], onDelete: NoAction, onUpdate: NoAction, map: "tb_posisihistorykontrak_ibfk_1")
+  tb_posisi               tb_posisi                          @relation(fields: [no_ktp], references: [no_ktp], onDelete: NoAction, onUpdate: NoAction, map: "tb_posisihistorykontrak_ibfk_2")
+
+  @@index([kd_branch], map: "kd_branch")
+  @@index([kd_divisi], map: "kd_divisi")
+  @@index([kd_jabatan], map: "kd_jabatan")
+  @@index([kd_outlet], map: "kd_outlet")
+  @@index([no_ktp], map: "no_ktp")
+}
+
+model tb_realisasiinvestasi {
+  id_realisasiinvestasi Int    @id @default(autoincrement())
+  periode               String @db.Char(4)
+  modal_tetap           BigInt
+  pembelian_tanah       BigInt
+  bangunan              BigInt
+  peralatan             BigInt
+  lainlain              BigInt
+  subjumlah             BigInt
+  modalkerja            BigInt
+  keterangan            String @db.VarChar(150)
+}
+
+model tb_referensi {
+  kode_ref String @db.Char(3)
+  nama_ref String @db.VarChar(40)
+  urut_ref Int
+  ket      String @db.VarChar(15)
+  format   String @db.VarChar(20)
+  syarat   Int
+
+  @@id([kode_ref, ket])
+}
+
+model tb_release {
+  id_release      Int                    @id
+  release_version String                 @db.VarChar(5)
+  role_status     tb_release_role_status
+}
+
+enum tb_inventarisperbaikan_status_kondisi {
+  Baik
+  Sedang_Diperbaiki @map("Sedang Diperbaiki")
+  Rusak
+}
+
+enum tb_release_role_status {
+  AKTIF
+  NONAKTIF
+}
+
+enum tb_mstuser_role_user {
+  ADMIN
+  USER
+}
+
+enum tb_mstbaranginventaris_status_kondisi {
+  Baik
+  Sedang_Diperbaiki @map("Sedang Diperbaiki")
+  Rusak
+}
+
+enum tb_mstkaryawan_jenis_kelamin {
+  Laki_laki @map("Laki-laki")
+  Perempuan
+}
+
+enum tb_mstkonsumen_status {
+  Aktif
+  NonAktif
+}
+
+enum tb_mstsupplier_status {
+  Aktif
+  NonAktif
+}
+
+enum tb_mstkaryawan_agama {
+  Islam
+  K__Protestan @map("K. Protestan")
+  K__Katholik  @map("K. Katholik")
+  Hindu
+  Budha
+  Konghucu
+}
+
+enum tb_mstuser_status_user {
+  AKTIF
+  NONAKTIF
+}
+
+enum tb_mstkaryawan_status_kawin {
+  Kawin
+  Belum_Kawin @map("Belum Kawin")
+  Janda
+  Duda
+}
+
+enum tb_posisihistoryall_keterangan {
+  Percobaan
+  Kontrak
+  Fix
+}
+
+enum tb_posisihistorykontrak_keterangan {
+  Percobaan
+  Kontrak
+  Fix
+}
+
+enum tb_periode_status {
+  Aktif
+  NonAktif
+}
+
+enum tb_mstkaryawan_pendidikan {
+  SD
+  SMP
+  SMA
+  D1
+  D3
+  S1
+  S2
+  S3
+}
+
+enum tb_mstkaryawan_status {
+  Aktif
+  Non_Aktif @map("Non Aktif")
+}
